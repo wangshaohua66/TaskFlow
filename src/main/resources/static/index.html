@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - 团队协作任务管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* 登录页面样式 */
+        .auth-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            margin-bottom: -2px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        /* 用户信息栏 */
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .user-actions button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+
+        .user-actions button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .todo-list {
+            margin-top: 20px;
+        }
+
+        .todo-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: box-shadow 0.3s;
+        }
+
+        .todo-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .todo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .todo-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .todo-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-in-progress {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-expired {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+
+        .todo-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .todo-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: #e9ecef;
+            color: #495057;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+        }
+
+        /* 用户管理模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-table th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-admin {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-user {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-inactive {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-locked {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册页面 -->
+    <div id="auth-page" class="auth-container">
+        <h1 style="text-align: center; margin-bottom: 10px;">📝 TaskFlow</h1>
+        <p class="subtitle" style="text-align: center;">团队协作任务管理系统</p>
+
+        <div id="auth-message"></div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="showAuthTab('login')">登录</button>
+            <button class="auth-tab" onclick="showAuthTab('register')">注册</button>
+        </div>
+
+        <!-- 登录表单 -->
+        <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="login-username" required placeholder="输入用户名">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="login-password" required placeholder="输入密码">
+            </div>
+            <button type="submit" style="width: 100%;">登录</button>
+            <p style="margin-top: 15px; text-align: center; font-size: 12px; color: #666;">
+                默认账号: admin / admin123
+            </p>
+        </form>
+
+        <!-- 注册表单 -->
+        <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="reg-username" required placeholder="输入用户名">
+            </div>
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="reg-email" required placeholder="输入邮箱">
+            </div>
+            <div class="form-group">
+                <label>显示名称</label>
+                <input type="text" id="reg-displayname" placeholder="输入显示名称（可选）">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="reg-password" required placeholder="至少6位字符">
+            </div>
+            <div class="form-group">
+                <label>确认密码</label>
+                <input type="password" id="reg-password-confirm" required placeholder="再次输入密码">
+            </div>
+            <button type="submit" style="width: 100%;">注册</button>
+        </form>
+    </div>
+
+    <!-- 主应用页面 -->
+    <div id="app-page" class="container hidden">
+        <!-- 用户信息栏 -->
+        <div class="user-bar">
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">A</div>
+                <div class="user-details">
+                    <div class="user-name" id="user-displayname">管理员</div>
+                    <div class="user-role" id="user-role">ADMIN</div>
+                </div>
+            </div>
+            <div class="user-actions">
+                <button onclick="showUserManagement()" id="btn-user-management">用户管理</button>
+                <button onclick="showChangePassword()">修改密码</button>
+                <button onclick="handleLogout()">退出登录</button>
+            </div>
+        </div>
+
+        <h1>📋 任务管理</h1>
+        <p class="subtitle">高效的团队协作与任务跟踪系统</p>
+
+        <div id="message"></div>
+
+        <!-- 统计信息 -->
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-count">-</div>
+                <div class="stat-label">总任务数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pending-count">-</div>
+                <div class="stat-label">待处理</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completed-count">-</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="expired-count">-</div>
+                <div class="stat-label">已过期</div>
+            </div>
+        </div>
+
+        <!-- 创建表单 -->
+        <div class="form-section">
+            <h2 style="margin-bottom: 15px;">创建新任务</h2>
+            <form id="create-form">
+                <div class="form-group">
+                    <label>标题 *</label>
+                    <input type="text" id="title" required maxlength="200" placeholder="输入任务标题">
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="description" maxlength="5000" placeholder="输入任务描述（可选）"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>优先级</label>
+                    <select id="priority">
+                        <option value="LOW">低</option>
+                        <option value="MEDIUM" selected>中</option>
+                        <option value="HIGH">高</option>
+                        <option value="CRITICAL">紧急</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>截止日期</label>
+                    <input type="datetime-local" id="dueDate">
+                </div>
+                <div class="form-group">
+                    <button type="submit">创建任务</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 搜索栏 -->
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="搜索任务...">
+            <button onclick="loadTodos()">搜索</button>
+            <button onclick="loadAllTodos()">显示全部</button>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="todo-list" id="todo-list">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <!-- 用户管理模态框 -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>用户管理</h2>
+                <button class="modal-close" onclick="closeUserModal()">&times;</button>
+            </div>
+            <div id="user-list">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码模态框 -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>修改密码</h2>
+                <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+            </div>
+            <form onsubmit="handleChangePassword(event)">
+                <div class="form-group">
+                    <label>当前密码</label>
+                    <input type="password" id="old-password" required>
+                </div>
+                <div class="form-group">
+                    <label>新密码</label>
+                    <input type="password" id="new-password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>确认新密码</label>
+                    <input type="password" id="confirm-password" required minlength="6">
+                </div>
+                <div id="password-message"></div>
+                <button type="submit" style="width: 100%;">修改密码</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        // ==================== 认证相关 ====================
+
+        // 显示认证标签页
+        function showAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+
+            if (tab === 'login') {
+                document.querySelector('.auth-tab:first-child').classList.add('active');
+                document.getElementById('login-form').classList.add('active');
+            } else {
+                document.querySelector('.auth-tab:last-child').classList.add('active');
+                document.getElementById('register-form').classList.add('active');
+            }
+        }
+
+        // 显示认证消息
+        function showAuthMessage(text, type = 'success') {
+            const msgDiv = document.getElementById('auth-message');
+            msgDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => msgDiv.innerHTML = '', 3000);
+        }
+
+        // 处理登录
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    authToken = result.data.token;
+                    currentUser = result.data;
+                    localStorage.setItem('authToken', authToken);
+                    showAppPage();
+                    showMessage('登录成功！', 'success');
+                } else {
+                    showAuthMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('登录失败:', error);
+                showAuthMessage('登录失败，请检查网络连接', 'error');
+            }
+        }
+
+        // 处理注册
+        async function handleRegister(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const displayName = document.getElementById('reg-displayname').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-password-confirm').value;
+
+            if (password !== confirmPassword) {
+                showAuthMessage('两次输入的密码不一致', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthMessage('密码长度至少为6位', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, email, displayName })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAuthMessage('注册成功！请登录', 'success');
+                    showAuthTab('login');
+                    document.getElementById('register-form').reset();
+                } else {
+                    showAuthMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('注册失败:', error);
+                showAuthMessage('注册失败，请检查网络连接', 'error');
+            }
+        }
+
+        // 处理登出
+        async function handleLogout() {
+            if (!confirm('确定要退出登录吗？')) return;
+
+            try {
+                await fetch(`${API_BASE}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+            } catch (error) {
+                console.error('登出请求失败:', error);
+            } finally {
+                authToken = null;
+                currentUser = null;
+                localStorage.removeItem('authToken');
+                showAuthPage();
+            }
+        }
+
+        // 检查登录状态
+        async function checkAuthStatus() {
+            if (!authToken) {
+                showAuthPage();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    showAppPage();
+                } else {
+                    authToken = null;
+                    localStorage.removeItem('authToken');
+                    showAuthPage();
+                }
+            } catch (error) {
+                console.error('认证检查失败:', error);
+                showAuthPage();
+            }
+        }
+
+        // 显示认证页面
+        function showAuthPage() {
+            document.getElementById('auth-page').classList.remove('hidden');
+            document.getElementById('app-page').classList.add('hidden');
+        }
+
+        // 显示应用页面
+        function showAppPage() {
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('app-page').classList.remove('hidden');
+
+            // 更新用户信息
+            if (currentUser) {
+                document.getElementById('user-avatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
+                document.getElementById('user-displayname').textContent = currentUser.displayName;
+                document.getElementById('user-role').textContent = currentUser.role;
+
+                // 非管理员隐藏用户管理按钮
+                if (currentUser.role !== 'ADMIN') {
+                    document.getElementById('btn-user-management').classList.add('hidden');
+                } else {
+                    document.getElementById('btn-user-management').classList.remove('hidden');
+                }
+            }
+
+            // 加载数据
+            loadTodos();
+            loadStats();
+        }
+
+        // ==================== 用户管理 ====================
+
+        // 显示用户管理模态框
+        async function showUserManagement() {
+            document.getElementById('user-modal').classList.add('active');
+            await loadUsers();
+        }
+
+        // 关闭用户管理模态框
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.remove('active');
+        }
+
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/users`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const result = await response.json();
+                const users = result.users || [];
+
+                const listDiv = document.getElementById('user-list');
+                listDiv.innerHTML = `
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>显示名称</th>
+                                <th>邮箱</th>
+                                <th>角色</th>
+                                <th>状态</th>
+                                <th>最后登录</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(user => `
+                                <tr>
+                                    <td>${user.id}</td>
+                                    <td>${escapeHtml(user.username)}</td>
+                                    <td>${escapeHtml(user.displayName)}</td>
+                                    <td>${escapeHtml(user.email)}</td>
+                                    <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
+                                    <td><span class="badge badge-${user.status.toLowerCase()}">${getStatusText(user.status)}</span></td>
+                                    <td>${user.lastLoginAt ? formatDate(user.lastLoginAt) : '从未'}</td>
+                                    <td>
+                                        ${user.id !== currentUser.id ? `
+                                            <button onclick="toggleUserRole(${user.id}, '${user.role}')" style="padding: 4px 8px; font-size: 11px; margin-right: 5px;">
+                                                ${user.role === 'ADMIN' ? '降为用户' : '提升为管理'}
+                                            </button>
+                                            <button onclick="toggleUserStatus(${user.id}, '${user.status}')" class="btn-warning" style="padding: 4px 8px; font-size: 11px; margin-right: 5px;">
+                                                ${user.status === 'ACTIVE' ? '锁定' : '激活'}
+                                            </button>
+                                            <button onclick="deleteUser(${user.id})" class="btn-danger" style="padding: 4px 8px; font-size: 11px;">删除</button>
+                                        ` : '<span style="color: #999; font-size: 11px;">当前用户</span>'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+                document.getElementById('user-list').innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+
+        // 切换用户角色
+        async function toggleUserRole(userId, currentRole) {
+            const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN';
+            const action = currentRole === 'ADMIN' ? '降级' : '提升';
+
+            if (!confirm(`确定要${action}该用户为${newRole === 'ADMIN' ? '管理员' : '普通用户'}吗？`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/users/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ role: newRole })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('操作成功');
+                    await loadUsers();
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('操作失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        // 切换用户状态
+        async function toggleUserStatus(userId, currentStatus) {
+            const newStatus = currentStatus === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
+            const action = currentStatus === 'ACTIVE' ? '锁定' : '激活';
+
+            if (!confirm(`确定要${action}该用户吗？`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/users/${userId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('操作成功');
+                    await loadUsers();
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('操作失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        // 删除用户
+        async function deleteUser(userId) {
+            if (!confirm('确定要删除该用户吗？此操作不可恢复！')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('删除成功');
+                    await loadUsers();
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                showMessage('删除失败', 'error');
+            }
+        }
+
+        // ==================== 修改密码 ====================
+
+        // 显示修改密码模态框
+        function showChangePassword() {
+            document.getElementById('password-modal').classList.add('active');
+        }
+
+        // 关闭修改密码模态框
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.remove('active');
+            document.getElementById('password-message').innerHTML = '';
+        }
+
+        // 处理修改密码
+        async function handleChangePassword(e) {
+            e.preventDefault();
+
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                document.getElementById('password-message').innerHTML = '<div class="message error">两次输入的新密码不一致</div>';
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                document.getElementById('password-message').innerHTML = '<div class="message error">新密码长度至少为6位</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ oldPassword, newPassword })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('密码修改成功');
+                    closePasswordModal();
+                    document.getElementById('old-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                } else {
+                    document.getElementById('password-message').innerHTML = `<div class="message error">${result.message}</div>`;
+                }
+            } catch (error) {
+                console.error('修改密码失败:', error);
+                document.getElementById('password-message').innerHTML = '<div class="message error">修改失败</div>';
+            }
+        }
+
+        // ==================== 任务管理（原有功能）====================
+
+        // 显示消息
+        function showMessage(text, type = 'success') {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => msgDiv.innerHTML = '', 3000);
+        }
+
+        // 加载统计信息
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/todos/statistics`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const stats = await response.json();
+
+                document.getElementById('total-count').textContent = stats.total || 0;
+                document.getElementById('pending-count').textContent = stats.pending || 0;
+                document.getElementById('completed-count').textContent = stats.completed || 0;
+                document.getElementById('expired-count').textContent = stats.expired || 0;
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+
+        // 加载所有任务
+        async function loadAllTodos() {
+            await loadTodos();
+        }
+
+        // 加载任务列表
+        async function loadTodos(keyword = '') {
+            try {
+                let url = `${API_BASE}/todos`;
+                if (keyword) {
+                    url = `${API_BASE}/todos/search?keyword=${encodeURIComponent(keyword)}`;
+                }
+
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const result = await response.json();
+                const todos = result.content || [];
+
+                const listDiv = document.getElementById('todo-list');
+
+                if (todos.length === 0) {
+                    listDiv.innerHTML = '<div class="empty-state">暂无任务</div>';
+                    return;
+                }
+
+                listDiv.innerHTML = todos.map(todo => `
+                    <div class="todo-item">
+                        <div class="todo-header">
+                            <div class="todo-title">${escapeHtml(todo.title)}</div>
+                            <span class="todo-status status-${todo.status.toLowerCase().replace('_', '-')}">
+                                ${getStatusText(todo.status)}
+                            </span>
+                        </div>
+                        ${todo.description ? `<p style="color: #666; font-size: 14px; margin-bottom: 10px;">${escapeHtml(todo.description)}</p>` : ''}
+                        <div class="todo-meta">
+                            <span>优先级: ${getPriorityText(todo.priority)}</span>
+                            ${todo.dueDate ? `<span>截止: ${formatDate(todo.dueDate)}</span>` : ''}
+                            <span>版本: v${todo.version}</span>
+                        </div>
+                        ${todo.tags && todo.tags.length > 0 ? `
+                            <div class="tags">
+                                ${todo.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="todo-actions" style="margin-top: 10px;">
+                            <button onclick="changeStatus(${todo.id}, 'IN_PROGRESS')">开始</button>
+                            <button onclick="changeStatus(${todo.id}, 'COMPLETED')" class="btn-success">完成</button>
+                            <button onclick="deleteTodo(${todo.id})" class="btn-danger">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('加载任务失败:', error);
+                document.getElementById('todo-list').innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+
+        // 创建任务
+        document.getElementById('create-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const priority = document.getElementById('priority').value;
+            const dueDate = document.getElementById('dueDate').value;
+
+            if (!title) {
+                showMessage('标题不能为空', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/todos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description: description || null,
+                        priority,
+                        dueDate: dueDate || null
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('任务创建成功');
+                    document.getElementById('create-form').reset();
+                    await loadTodos();
+                    await loadStats();
+                } else {
+                    showMessage('创建失败', 'error');
+                }
+            } catch (error) {
+                console.error('创建失败:', error);
+                showMessage('创建失败', 'error');
+            }
+        });
+
+        // 更改状态
+        async function changeStatus(id, status) {
+            try {
+                const response = await fetch(`${API_BASE}/todos/${id}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    showMessage('状态更新成功');
+                    await loadTodos();
+                    await loadStats();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.error || '更新失败', 'error');
+                }
+            } catch (error) {
+                console.error('更新失败:', error);
+                showMessage('更新失败', 'error');
+            }
+        }
+
+        // 删除任务
+        async function deleteTodo(id) {
+            if (!confirm('确定要删除这个任务吗?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/todos/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    showMessage('删除成功');
+                    await loadTodos();
+                    await loadStats();
+                } else {
+                    showMessage('删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                showMessage('删除失败', 'error');
+            }
+        }
+
+        // 搜索
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadTodos(e.target.value);
+            }
+        });
+
+        // 辅助函数
+        function getStatusText(status) {
+            const map = {
+                'PENDING': '待处理',
+                'IN_PROGRESS': '进行中',
+                'COMPLETED': '已完成',
+                'CANCELLED': '已取消',
+                'EXPIRED': '已过期',
+                'ACTIVE': '激活',
+                'INACTIVE': '未激活',
+                'LOCKED': '锁定'
+            };
+            return map[status] || status;
+        }
+
+        function getPriorityText(priority) {
+            const map = {
+                'LOW': '低',
+                'MEDIUM': '中',
+                'HIGH': '高',
+                'CRITICAL': '紧急'
+            };
+            return map[priority] || priority;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleString('zh-CN');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 初始化 - 检查登录状态
+        checkAuthStatus();
+
+        // 每30秒刷新一次统计
+        setInterval(() => {
+            if (authToken) {
+                loadStats();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

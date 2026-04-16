@@ -1,0 +1,12 @@
+[ {
+  "id" : 1,
+  "username" : "admin",
+  "password" : "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+  "email" : "admin@taskflow.com",
+  "displayName" : "系统管理员",
+  "role" : "ADMIN",
+  "status" : "ACTIVE",
+  "createdAt" : "2026-04-16T13:55:47.217816",
+  "updatedAt" : "2026-04-16T13:58:37.166162",
+  "lastLoginAt" : "2026-04-16T13:58:37.166098"
+} ]

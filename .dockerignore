@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# 数据文件（运行时生成）
+data/
+
+# 日志
+*.log
+logs/
+
+# 文档
+*.md
+docs/
+
+# 测试报告
+test-results/
+jacoco/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 其他
+frozen-requirements.txt
+quickstart.sh
