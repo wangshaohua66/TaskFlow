@@ -11,7 +11,7 @@
 .DS_Store
 
 # Maven
-target/
+# target/
 !.mvn/wrapper/maven-wrapper.jar
 
 # 数据文件（运行时生成）

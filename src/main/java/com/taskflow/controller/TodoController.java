@@ -39,21 +39,17 @@ public class TodoController {
      * POST /api/todos
      */
     @PostMapping
-    public ResponseEntity<Todo> createTodo(@RequestBody CreateTodoRequest request) {
-        try {
-            Todo todo = todoService.createTodo(
-                request.getTitle(),
-                request.getDescription(),
-                request.getPriority(),
-                request.getDueDate(),
-                request.getReminderTime(),
-                request.getTags(),
-                request.getParentId()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(todo);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public Todo createTodo(@RequestBody CreateTodoRequest request) {
+        return todoService.createTodo(
+            request.getTitle(),
+            request.getDescription(),
+            request.getPriority(),
+            request.getDueDate(),
+            request.getReminderTime(),
+            request.getTags(),
+            request.getParentId()
+        );
     }
 
     /**
@@ -76,13 +72,8 @@ public class TodoController {
      * GET /api/todos/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Todo> getTodo(@PathVariable Long id) {
-        try {
-            Todo todo = todoService.getTodoById(id);
-            return ResponseEntity.ok(todo);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public Todo getTodo(@PathVariable Long id) {
+        return todoService.getTodoById(id);
     }
 
     /**
@@ -90,25 +81,16 @@ public class TodoController {
      * PUT /api/todos/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTodo(@PathVariable Long id, @RequestBody UpdateTodoRequest request) {
-        try {
-            Todo todo = todoService.updateTodo(
-                id,
-                request.getTitle(),
-                request.getDescription(),
-                request.getPriority(),
-                request.getDueDate(),
-                request.getReminderTime(),
-                request.getVersion()
-            );
-            return ResponseEntity.ok(todo);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (OptimisticLockException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap("error", e.getMessage()));
-        } catch (BusinessRuleException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
-        }
+    public Todo updateTodo(@PathVariable Long id, @RequestBody UpdateTodoRequest request) {
+        return todoService.updateTodo(
+            id,
+            request.getTitle(),
+            request.getDescription(),
+            request.getPriority(),
+            request.getDueDate(),
+            request.getReminderTime(),
+            request.getVersion()
+        );
     }
 
     /**
@@ -116,20 +98,12 @@ public class TodoController {
      * PATCH /api/todos/{id}
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchTodo(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        try {
-            Integer version = (Integer) updates.remove("version");
-            if (version == null) {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("error", "缺少版本号"));
-            }
-
-            Todo todo = todoService.patchTodo(id, updates, version);
-            return ResponseEntity.ok(todo);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (OptimisticLockException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap("error", e.getMessage()));
+    public Todo patchTodo(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        Integer version = (Integer) updates.remove("version");
+        if (version == null) {
+            throw new IllegalArgumentException("缺少版本号");
         }
+        return todoService.patchTodo(id, updates, version);
     }
 
     /**
@@ -137,15 +111,9 @@ public class TodoController {
      * DELETE /api/todos/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTodo(@PathVariable Long id) {
-        try {
-            todoService.deleteTodo(id);
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (BusinessRuleException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTodo(@PathVariable Long id) {
+        todoService.deleteTodo(id);
     }
 
     /**
@@ -308,13 +276,9 @@ public class TodoController {
      * POST /api/todos/{id}/clone
      */
     @PostMapping("/{id}/clone")
-    public ResponseEntity<Todo> cloneTodo(@PathVariable Long id) {
-        try {
-            Todo cloned = todoService.cloneTodo(id);
-            return ResponseEntity.status(HttpStatus.CREATED).body(cloned);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public Todo cloneTodo(@PathVariable Long id) {
+        return todoService.cloneTodo(id);
     }
 
     // ==================== 请求DTO类 ====================

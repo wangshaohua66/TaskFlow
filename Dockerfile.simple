@@ -1,0 +1,23 @@
+# 简单 Dockerfile - 使用本地预构建的 jar 文件
+FROM eclipse-temurin:8-jre
+
+# 设置工作目录
+WORKDIR /app
+
+# 创建非 root 用户运行应用 (安全最佳实践)
+RUN groupadd -r taskflow && useradd -r -g taskflow taskflow
+
+# 复制 jar 文件
+COPY target/*.jar app.jar
+
+# 更改文件所有者
+RUN chown -R taskflow:taskflow /app
+
+# 切换到非 root 用户
+USER taskflow
+
+# 暴露应用端口
+EXPOSE 8080
+
+# 启动应用
+ENTRYPOINT ["java", "-jar", "app.jar"]
