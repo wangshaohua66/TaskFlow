@@ -192,13 +192,14 @@ public class Todo {
         if (tag == null || tag.trim().isEmpty()) {
             throw new IllegalArgumentException("标签不能为空");
         }
-        if (tags.contains(tag)) {
+        String normalizedTag = tag.trim().toLowerCase();
+        if (tags.contains(normalizedTag)) {
             throw new IllegalArgumentException("标签已存在: " + tag);
         }
         if (tags.size() >= MAX_TAGS_COUNT) {
             throw new IllegalArgumentException("标签数量已达上限");
         }
-        tags.add(tag.trim().toLowerCase());
+        tags.add(normalizedTag);
         this.updatedAt = LocalDateTime.now();
         this.version++;
     }
